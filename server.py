@@ -10,7 +10,11 @@ from flask import Flask,request
 
 
 DEFAULT = {"dht22": [12]}
-BOARDS = {1337: {"dht22":[0,2], "a":[]}}
+BOARDS = {
+	1337: {"dht22":[0,2], "a":[]},
+	1711338: {"dht22":[12,14,2,0,4,5]},
+	386198: {"interrupt0":[5],"interrupt1":[4],"analog":[0]},
+	}
 
 app = Flask(__name__)
 
@@ -21,7 +25,11 @@ def index(path):
 	print(content)
 	response = 'false'
 	if "register" in path:
-		data = json.loads(content)
+		try:
+			data = json.loads(content)
+		except Exception as e:
+			app.logger.exception(e)
+			data = {}
 		if not "board" in data:
 			app.logger.error("register called without board: "+content)
 		else:
@@ -34,7 +42,7 @@ def index(path):
 		#response = {"interval": 20}
 		pass
 	response_data = json.dumps(response)
-	app.logger.info("%s %s: %s => %s", request.method, path, content, response_data)
+	app.logger.info("%s %s %s: %s => %s", request.remote_addr, request.method, path, content, response_data)
 	return response_data
 
 if __name__ == "__main__":
